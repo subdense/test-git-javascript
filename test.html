@@ -1,4 +1,7 @@
 <!DOCTYPE html>
+
+<body>
+
 <script src="https://unpkg.com/@isomorphic-git/lightning-fs"></script>
 <script src="https://unpkg.com/isomorphic-git@beta"></script>
 <script type="module">
@@ -7,7 +10,9 @@ window.fs = new LightningFS('fs')
 window.pfs = window.fs.promises
 
 window.dir = '/test'
-try{await pfs.mkdir(dir)}catch(err){}
+try{
+  await pfs.mkdir(dir)
+}catch(err){}
 
 // dependancy to CORS proxy: https://cors.isomorphic-git.org/
 // -> if the app is expected to handle a large number of files (?) and/or large files, need to install the cors proxy software on our own instance
@@ -30,6 +35,37 @@ console.log(dircontent)
 let log = await git.log({fs, dir})
 console.log(log)
 
+// new file from user input
+
+async function commit_comment(){
+  const user = "test_user"
+  const comment = "{comment:\""+document.getElementById("comment").value+"\"}"
+  const ts = (new Date()).getTime()
+  const file_path = "test/user_comment_"+ts+".json"
+  console.log("Committing comment: "+comment)
+  try{await pfs.mkdir(dir+'/test')}catch(err){}
+  await pfs.writeFile(dir+"/"+file_path, comment, 'utf8')
+  await git.add({fs, dir, filepath: file_path})
+  let sha = await git.commit({
+    fs,
+    dir,
+    message: `Comment by ${user} on ${ts}.`,
+    author: {name: user,email: user+'@email.com'}
+  })
+
+  console.log(sha)
+
+}
+
+//document.getElementById("comment_button").onclick = commit_comment()
+document.getElementById("comment_button").addEventListener("click", commit_comment)
+
+
 </script>
 
+<input id="comment"/>
+<button id="comment_button">Comment</button>
+
+
+</body>
 
