@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<script src="https://unpkg.com/@isomorphic-git/lightning-fs"></script>
+<script src="https://unpkg.com/isomorphic-git@beta"></script>
+<script type="module">
+import http from 'https://unpkg.com/isomorphic-git@beta/http/web/index.js'
+window.fs = new LightningFS('fs')
+window.pfs = window.fs.promises
+
+window.dir = '/test'
+try{await pfs.mkdir(dir)}catch(err){}
+
+// dependancy to CORS proxy: https://cors.isomorphic-git.org/
+// -> if the app is expected to handle a large number of files (?) and/or large files, need to install the cors proxy software on our own instance
+await git.clone({
+  fs,
+  http,
+  dir,
+  corsProxy: 'https://cors.isomorphic-git.org',
+  url: 'https://github.com/subdense/test-git-javascript',
+  ref: 'main',
+  singleBranch: true,
+  depth: 10
+});
+
+// check cloned
+let dircontent = await pfs.readdir(dir);
+console.log(dircontent)
+
+// git log
+let log = await git.log({fs, dir})
+console.log(log)
+
+</script>
+
+
